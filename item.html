@@ -1,0 +1,269 @@
+<!DOCTYPE HTML>
+<html lang="zh-cn">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>章节管理</title>
+	<link href="resources/plugins/bootstrap-3.3.0/css/bootstrap.min.css" rel="stylesheet"/>
+	<link href="resources/plugins/material-design-iconic-font-2.2.0/css/material-design-iconic-font.min.css" rel="stylesheet"/>
+	<link href="resources/plugins/bootstrap-table-1.11.0/bootstrap-table.min.css" rel="stylesheet"/>
+	<link href="resources/plugins/waves-0.7.5/waves.min.css" rel="stylesheet"/>
+	<link href="resources/plugins/jquery-confirm/jquery-confirm.min.css" rel="stylesheet"/>
+	<link href="resources/plugins/select2/css/select2.min.css" rel="stylesheet"/>
+	<link href="http://libs.baidu.com/bootstrap/3.0.3/css/bootstrap.min.css" rel="stylesheet">
+    <script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
+    <script src="http://libs.baidu.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
+    <script src="https://cdn.bootcss.com/bootstrap-table/1.12.1/extensions/editable/bootstrap-table-editable.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<link href="resources/css/common.css" rel="stylesheet"/>
+</head>
+<body>
+<div id="main">
+	<div id="toolbar">
+		<a class="waves-effect waves-button" href="javascript:;" onclick="additem()"><i class="zmdi zmdi-close"></i> 添加章节</a>
+		<a class="waves-effect waves-button" href="javascript:;" onclick="deleteitem()"><i class="zmdi zmdi-close"></i> 删除章节</a>
+	</div>
+	<table id="table"></table>
+</div>
+
+
+<script src="resources/plugins/jquery.1.12.4.min.js"></script>
+<script src="resources/plugins/bootstrap-3.3.0/js/bootstrap.min.js"></script>
+<script src="resources/plugins/bootstrap-table-1.11.0/bootstrap-table.min.js"></script>
+<script src="resources/plugins/bootstrap-table-1.11.0/locale/bootstrap-table-zh-CN.min.js"></script>
+<script src="resources/plugins/waves-0.7.5/waves.min.js"></script>
+<script src="resources/plugins/jquery-confirm/jquery-confirm.min.js"></script>
+<script src="resources/plugins/select2/js/select2.min.js"></script>
+
+<script src="resources/js/common.js"></script>
+<script>
+
+function additem(){
+	$(location).attr("href","itemEdit.html")
+}
+
+$("#TableAdd").click(function(){
+$('#addBook').modal();
+  $.ajax({
+  	type:"get",
+ 		url:"http://localhost:8080/admin/books/class",
+		success: function (result) {
+			$("#Bookclass").empty();
+			if(result != null){
+				var h = "";  
+                $.each(result.data,function(key, value) {
+                	h += "<option value='" + value.id + "' >" + value.className + "</option>";
+                });  //下拉框序言的循环数据
+                $("#Bookclass").append(h);//append 添加进去并展示  
+        	}else{
+        		$.alert("图书分类获取失败");
+        	}
+    	}
+  	 });
+}); 
+
+  
+var $table = $('#table');
+$(function() {
+	$table.bootstrapTable({
+		url: 'http://localhost:8080/admin/items',
+		method: "get",   
+		dataType: "json",
+		contentType: 'application/json,charset=utf-8',
+		height: getHeight(),
+		striped: true,
+		searchOnEnterKey: true,
+		showRefresh: true,
+		minimumCountColumns: 2,
+		sidePagination : "server",
+		showPaginationSwitch: true,
+		clickToSelect: false,
+		detailFormatter: 'detailFormatter',
+		pagination: true,
+		paginationLoop: false,
+		classes: 'table table-hover table-no-bordered',
+		smartDisplay: false,
+		idField: 'id',
+		sortName: 'id',
+		sortOrder: 'desc',
+		escape: true,
+		searchOnEnterKey: true,
+		idField: 'systemId',
+		maintainSelected: true,
+		toolbar: '#toolbar',
+		responseHandler: function(res){
+        //在ajax获取到数据，渲染表格之前，修改数据源
+		        var nres = [];
+		        nres.push({total:res.total,rows:res.list});
+		        return nres[0];
+   		}, 
+		queryParams: function (params) {
+            return {
+                pageSize: params.limit,
+                pageNum: Math.ceil(params.offset / params.limit) + 1,
+      
+            }
+        },
+		columns: [
+			{field: 'state', checkbox: true},
+			{field: 'id', title: '章节编号', halign: 'left'},
+			{field: 'bookName', title: '图书名称', halign: 'left'},
+			{field: 'bookid', title: '屠图书编号', halign: 'left'},
+			{field: 'createtime', title: '创建时间', halign: 'left'},
+			{field: 'titleName', title: '章节标题', halign: 'left'},
+			{field: 'content', title: '章节内容', halign: 'left'},
+			{field: 'action', title: '操作', halign: 'left', align: 'center', formatter: function(value,row,index){
+			 	return [
+					'<button id = "TableEditor" data-toggle = "modal" data-target:"#updateBook" >编辑</button>'
+				].join("");
+           },
+			events: {
+		      "click #TableEditor":function(value,row,index){
+		      	  var a= $table.bootstrapTable('getSelections');
+		      	  $('#updateBook').modal();
+		      	  $('#uid').val(a[0].id);
+		      	  $('#ubookname').val(a[0].bookname);
+		      	  $('#uauthor').val(a[0].author);
+		      	  $('#upurice').val(a[0].price);
+		      	  $('#usynopsis').val(a[0].synopsis);
+		      	  $.ajax({
+		      	  	type:"get",
+		      	  	url:"http://localhost:8080/admin/books/class",
+		      	  	success: function (result) {
+			        	if(result != null){
+			        		$("#editBookclass").empty();
+							var h = "";  
+			                $.each(result.data,function(key, value) {
+			                	if(a[0].classify == value.id){
+			                		h += "<option value='" + value.id + "' selected='"+ true +"' >" + value.className + "</option>";
+			                	}else{
+			                		h += "<option value='" + value.id + "' >" + value.className + "</option>";
+			                	}
+			                });  
+			                $("#editBookclass").append(h);//append 添加进去并展示  
+			        	}else{
+			        		$.alert("角色信息获取失败");
+			        	}
+			        }
+		      	  });
+
+		      }
+			}
+			}
+		],
+	})
+});
+
+function updateAction(){
+	$.ajax({
+		type:"put",
+		url:"http://localhost:8080/admin/books/"+$('#uid').val(),
+        dataType: "json",
+        contentType: 'application/json',
+		data:JSON.stringify({
+            'bookname':$('#ubookname').val(),
+            'author':$('#uauthor').val(),
+            'price':$('#upurice').val(),
+            'synopsis': $('#usynopsis').val(),
+			'classify': jQuery("#editBookclass  option:selected").val()
+   		}),
+		success: function (date) {
+        	if(date.status == 1){
+        		window.location.reload()
+				
+        	}else{
+        		$.alert(date.message);
+        	}
+        }
+   	})
+}
+
+function actionFormatter(value, row, index) {
+	return [
+		'<button id = "TableEditor" data-toggle = "modal" data-target:"#myModal" >编辑</button>'
+	].join("");
+
+}
+
+
+// 新增
+function createBook() {
+$.ajax({
+		type:"post",
+		url:"http://localhost:8080/admin/books/add",
+        dataType: "json",
+        contentType: 'application/json',
+		data:JSON.stringify({
+            'bookname':$('#bookname').val(),
+            'author':$('#author').val(),
+            'price':$('#price').val(),
+            'synopsis': $('#synopsis').val(),
+            'classify': jQuery("#Bookclass  option:selected").val()
+   		}),
+		success: function (date) {
+        	if(date.status == 1){
+        		window.location.reload()
+        	}else{
+        		$.alert(date.message);
+        	}
+        }
+   	})
+}
+
+// 删除
+function deleteAction() {
+	var rows = $table.bootstrapTable('getSelections');
+	if (rows.length == 0) {
+		$.confirm({
+			title: false,
+			content: '请至少选择一条记录！',
+			autoClose: 'cancel|3000',
+			backgroundDismiss: true,
+			buttons: {
+				cancel: {
+					text: '取消',
+					btnClass: 'waves-effect waves-button'
+				}
+			}
+		});
+	} else {
+		$.confirm({
+			type: 'red',
+			animationSpeed: 300,
+			title: false,
+			content: '确认删除该系统吗？',
+			buttons: {
+				confirm: {
+					text: '确认',
+					btnClass: 'waves-effect waves-button',
+					action: function () {
+						var ids = new Array();
+						for (var i in rows) {
+							ids.push(rows[i].id);
+						}
+						$.ajax({
+		                    url: "http://localhost:8080/admin/books/"+ids,
+		                    type: 'delete',
+		                    success: function (date) {
+		                    	if(date.status != 0){
+		                    		window.location.reload()
+		                    	}else{
+		                    		$.alert(date.message);
+		                    	}
+		                    }
+		               		})
+					}
+				},
+				cancel: {
+					text: '取消',
+					btnClass: 'waves-effect waves-button'
+				}
+			}
+		});
+	}
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE HTML>
+<html lang="zh-cn">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>章节管理</title>
+	<link href="resources/plugins/bootstrap-3.3.0/css/bootstrap.min.css" rel="stylesheet"/>
+	<link href="resources/plugins/material-design-iconic-font-2.2.0/css/material-design-iconic-font.min.css" rel="stylesheet"/>
+	<link href="resources/plugins/bootstrap-table-1.11.0/bootstrap-table.min.css" rel="stylesheet"/>
+	<link href="resources/plugins/waves-0.7.5/waves.min.css" rel="stylesheet"/>
+	<link href="resources/plugins/jquery-confirm/jquery-confirm.min.css" rel="stylesheet"/>
+	<link href="resources/plugins/select2/css/select2.min.css" rel="stylesheet"/>
+	<link href="http://libs.baidu.com/bootstrap/3.0.3/css/bootstrap.min.css" rel="stylesheet">
+    <script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
+    <script src="http://libs.baidu.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
+    <script src="https://cdn.bootcss.com/bootstrap-table/1.12.1/extensions/editable/bootstrap-table-editable.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<link href="resources/css/common.css" rel="stylesheet"/>
+</head>
+<body>
+
+<div style="width: 60%;">
+  <div>
+    <label>图书名称,请误填错</label>
+    <input type="text" class="form-control" id="bookname" >
+  </div>
+  <br>
+  <div>
+  	 <label>第几章节(直接填数字即可),请勿填错</label>
+      <input type="text" class="form-control" id="num">
+  </div>
+  <br>
+   <div>
+   	  <label>章节标题</label>
+      <input type="text" class="form-control" id="titleName">
+  </div>
+  <br>
+   <div>
+   	  <label>章节内容</label>
+      <div id="div1"></div>
+  </div>
+  <div>
+    <div class="col-sm-offset-2 col-sm-10">
+      <button type="submit" class="btn btn-default" onclick="pushItem()">提交</button>
+      <button type="reset" class="btn btn-default">撤回</button>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript" src="resources/wangEditor.min.js"></script>
+<script type="text/javascript">
+    var E = window.wangEditor
+    var editor1 = new E('#div1')  
+    editor1.create()
+    
+    function pushItem(){
+    	$.ajax({
+		type:"post",
+		url:"http://localhost:8080/admin/items",
+        dataType: "json",
+        contentType: 'application/json',
+		data:JSON.stringify({
+            'num':$('#num').val(),
+            'titleName':$('#titleName').val(),
+            'content':editor1.txt.html(),
+            'bookName': $('#bookname').val(),
+   		}),
+		success: function (date) {
+        	if(date.status == 1){
+        		$(location).attr("href","item.html")
+        	}else{
+        		$.alert("添加章节失败");
+        	}
+        }
+   	})
+    }
+</script>
+
+</body>
+</html>
