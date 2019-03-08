@@ -116,45 +116,20 @@ $(function() {
 			{field: 'content', title: '章节内容', halign: 'left'},
 			{field: 'action', title: '操作', halign: 'left', align: 'center', formatter: function(value,row,index){
 			 	return [
-					'<button id = "TableEditor" data-toggle = "modal" data-target:"#updateBook" >编辑</button>'
+					'<button id = "TableEditor" >编辑</button>'
 				].join("");
            },
 			events: {
 		      "click #TableEditor":function(value,row,index){
 		      	  var a= $table.bootstrapTable('getSelections');
-		      	  $('#updateBook').modal();
-		      	  $('#uid').val(a[0].id);
-		      	  $('#ubookname').val(a[0].bookname);
-		      	  $('#uauthor').val(a[0].author);
-		      	  $('#upurice').val(a[0].price);
-		      	  $('#usynopsis').val(a[0].synopsis);
-		      	  $.ajax({
-		      	  	type:"get",
-		      	  	url:"http://localhost:8080/admin/books/class",
-		      	  	success: function (result) {
-			        	if(result != null){
-			        		$("#editBookclass").empty();
-							var h = "";  
-			                $.each(result.data,function(key, value) {
-			                	if(a[0].classify == value.id){
-			                		h += "<option value='" + value.id + "' selected='"+ true +"' >" + value.className + "</option>";
-			                	}else{
-			                		h += "<option value='" + value.id + "' >" + value.className + "</option>";
-			                	}
-			                });  
-			                $("#editBookclass").append(h);//append 添加进去并展示  
-			        	}else{
-			        		$.alert("角色信息获取失败");
-			        	}
-			        }
-		      	  });
-
+		      	  window.location.href="itemEdit.html?id="+a[0].id;
 		      }
 			}
 			}
 		],
 	})
 });
+
 
 function updateAction(){
 	$.ajax({
